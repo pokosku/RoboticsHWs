@@ -1,6 +1,5 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import matplotlib.ticker as ticker
 from manipulators import Planar3R
 
 pi = np.pi
@@ -28,7 +27,13 @@ for init_q, init_q_string in initial_conditions:
 
     while not converge and i < MAX_ITER:
         kin_map = k(q)
-        q = q + (np.linalg.pinv(J(q)) @ (x_e - kin_map))
+        J_a = J(q)
+        det = np.linalg.det(J_a)
+        if np.isclose(det, 0):
+            q = q + (np.linalg.pinv(J_a) @ (x_e - kin_map))
+        else:
+            q = q + (np.linalg.inv(J_a) @ (x_e - kin_map))
+
         e = 0.5 * np.linalg.norm(x_e - kin_map)**2
         converge = e < EPS
         objective.append(e)
